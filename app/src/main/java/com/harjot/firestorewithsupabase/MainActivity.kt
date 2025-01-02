@@ -166,7 +166,8 @@ class MainActivity : AppCompatActivity(), RecyclerInterface {
                     .load(arrayList[position].image)
                     .centerCrop()
                     .into(dialogBinding.ivImage)
-                Toast.makeText(this@MainActivity, "$imgUri", Toast.LENGTH_SHORT).show()
+                imgUri = arrayList[position].imgUri?.toUri()
+                Toast.makeText(this@MainActivity, "${imgUri}", Toast.LENGTH_SHORT).show()
 
             }else{
                 dialogBinding.btnAdd.setText("Add")
@@ -184,12 +185,17 @@ class MainActivity : AppCompatActivity(), RecyclerInterface {
                 }else  if (dialogBinding.etPhoneNo.text.toString().trim().isNullOrEmpty()){
                     dialogBinding.etPhoneNo.error = "Enter PhoneNo"
                 }else{
-                    if (imgUri == null) {
-                        Toast.makeText(this@MainActivity, "Please select an image", Toast.LENGTH_SHORT).show()
-                        return@setOnClickListener
+                    if (position > -1){
+                        if (imgUri == null){
+                            Toast.makeText(this@MainActivity, "Select Image", Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener
+                        }
+                        addUpdate(position)
+                    }else{
+                        binding.llLoader.visibility = View.VISIBLE
+                        uploadImageToSupabase(imgUri!!,position)
                     }
-                    binding.llLoader.visibility = View.VISIBLE
-                    uploadImageToSupabase(imgUri!!,position)
+
                     dismiss()
                 }
             }
@@ -339,7 +345,8 @@ class MainActivity : AppCompatActivity(), RecyclerInterface {
                 name = dialogBinding.etName.text.toString(),
                 email = dialogBinding.etEmail.text.toString(),
                 phoneNo = dialogBinding.etPhoneNo.text.toString(),
-                image = imagegUrl
+                image = imagegUrl,
+                imgUri = imgUri.toString()
             )
             database.collection(collectionName).document(arrayList[position].id?:"").set(userModel)
                 .addOnSuccessListener {
@@ -360,7 +367,8 @@ class MainActivity : AppCompatActivity(), RecyclerInterface {
                     name = dialogBinding.etName.text.toString(),
                     email = dialogBinding.etEmail.text.toString(),
                     phoneNo = dialogBinding.etPhoneNo.text.toString(),
-                    image = imagegUrl
+                    image = imagegUrl,
+                    imgUri = imgUri.toString()
                 )
             ).addOnSuccessListener {
                 binding.llLoader.visibility = View.GONE
